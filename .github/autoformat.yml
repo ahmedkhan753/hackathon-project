@@ -1,0 +1,15 @@
+name: Autoformat on push
+on: [push, pull_request]
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with: python-version: '3.10'
+      - run: pip install black
+      - run: black .
+      - name: Commit formatted code
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: autoformat with black"
