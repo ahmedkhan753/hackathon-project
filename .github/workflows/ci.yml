@@ -22,8 +22,7 @@ jobs:
       - name: Frontend Linting (ESLint)
         run: |
           cd frontend
-          # Using --if-present so it doesn't crash if script is missing
-          npm install --only=dev 
+          npm install --only=dev
           npm run lint --if-present
 
   backend-tests:
