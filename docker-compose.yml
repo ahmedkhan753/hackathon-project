@@ -7,9 +7,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
-      - redis
-      - minio
+      db:
+      condition: service_healthy
 
   frontend:
     build: ./frontend
@@ -18,6 +17,11 @@ services:
 
   db:
     image: mysql:8
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     environment:
       MYSQL_DATABASE: app
       MYSQL_USER: user
