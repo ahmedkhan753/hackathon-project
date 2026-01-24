@@ -1,0 +1,42 @@
+from datetime import datetime
+from pydantic import BaseModel, Field
+
+
+class ServiceCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str | None = None
+    category: str | None = Field(None, max_length=100)
+
+
+class ServiceUpdate(BaseModel):
+    title: str | None = Field(None, min_length=1, max_length=200)
+    description: str | None = None
+    category: str | None = Field(None, max_length=100)
+    status: str | None = Field(None, pattern="^(active|inactive)$")
+
+
+class ServiceResponse(BaseModel):
+    id: int
+    provider_id: int
+    title: str
+    description: str | None
+    category: str | None
+    status: str
+    created_at: datetime
+    updated_at: datetime | None
+
+    class Config:
+        from_attributes = True
+
+
+class ServiceList(BaseModel):
+    id: int
+    provider_id: int
+    title: str
+    description: str | None
+    category: str | None
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

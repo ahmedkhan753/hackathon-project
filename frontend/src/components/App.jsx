@@ -1,36 +1,94 @@
-import { useState } from 'react';
-import reactLogo from '../assets/react.svg';
-import viteLogo from '/vite.svg';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import AuthPage from '../pages/AuthPage';
+import Dashboard from '../pages/Dashboard';
 import '../styles/App.css';
 
-function App() {
-  const [count, setCount] = useState(0); // State variable for the counter
+// Error Boundary Component
+import React from 'react';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('App Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#0f172a',
+          color: 'white',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          padding: '20px'
+        }}>
+          <h1 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#ef4444' }}>
+            Something went wrong
+          </h1>
+          <p style={{ textAlign: 'center', marginBottom: '2rem', opacity: 0.8 }}>
+            The application encountered an error. Please check the console for details.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Reload Page
+          </button>
+          {process.env.NODE_ENV === 'development' && (
+            <details style={{ marginTop: '2rem', maxWidth: '600px' }}>
+              <summary style={{ cursor: 'pointer', marginBottom: '1rem' }}>
+                Error Details
+              </summary>
+              <pre style={{
+                backgroundColor: '#1e293b',
+                padding: '1rem',
+                borderRadius: '5px',
+                overflow: 'auto',
+                fontSize: '0.8rem'
+              }}>
+                {this.state.error?.toString()}
+              </pre>
+            </details>
+          )}
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+function App() {
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        {/* Button to increment the count, using the setCount function */}
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/components/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/" element={<Navigate to="/auth" replace />} />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
-export default App; // Export the component for use in index.jsx
+export default App;
