@@ -1,0 +1,2 @@
+class service(base):
+    pass

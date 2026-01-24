@@ -1,0 +1,2 @@
+class booking(base):
+    pass
