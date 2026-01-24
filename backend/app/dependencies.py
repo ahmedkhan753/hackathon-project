@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 
 from app.db.database import SessionLocal
-from app.db.models.user import User 
+from app.models.user import User 
 from app.schemas.user import UserResponse
 
 load_dotenv()
