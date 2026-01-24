@@ -65,7 +65,22 @@ jobs:
       - name: Install frontend deps
         run: |
           cd frontend
-          npm install
+          npm ci
+
+      - name: Ensure frontend bin permissions
+        run: |
+          cd frontend
+          chmod -R u+rX node_modules/.bin || true
+          ls -la node_modules/.bin || true
+
+      - name: Debug node & npm & bin dir
+        run: |
+          cd frontend
+          node -v
+          npm -v
+          ls -la node_modules/.bin || true
+          stat node_modules/.bin/vite || true
+          which vite || true
 
       - name: Build frontend
         run: |
