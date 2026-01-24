@@ -12,3 +12,5 @@ email-validator
 pydantic[email]
 python-multipart
 pymysql
+cryptography
+bcrypt==4.0.1
