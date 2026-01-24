@@ -4,6 +4,11 @@ pydantic
 sqlalchemy
 pytest
 httpx
-passlib[bycrypt]
-python-jose[cryptography]
+passlib[bcrypt]
+python-jose
 python-dotenv
+
+email-validator
+pydantic[email]
+python-multipart
+pymysql
