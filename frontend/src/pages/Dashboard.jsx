@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { getCurrentUser } from '../services/auth';
-import { LogOut, User } from 'lucide-react';
+import { servicesAPI, bookingsAPI } from '../services/api';
+import Sidebar from '../components/Sidebar';
+import { Card, LoadingSpinner } from '../components/UIComponents';
+import { Package, Calendar, TrendingUp, Users } from 'lucide-react';
 
-const Dashboard = () => {
+const DashboardPage = () => {
     const [user, setUser] = useState(null);
+    const [stats, setStats] = useState({
+        myServices: 0,
+        myBookings: 0,
+        totalServices: 0,
+    });
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -14,18 +24,33 @@ const Dashboard = () => {
             return;
         }
 
-        const fetchUser = async () => {
+        const fetchData = async () => {
             try {
                 const userData = await getCurrentUser(token);
                 setUser(userData);
+
+                // Fetch stats
+                const [myServices, bookings, allServices] = await Promise.all([
+                    servicesAPI.list({ provider_id: userData.id }),
+                    bookingsAPI.list(),
+                    servicesAPI.list({ limit: 1 }),
+                ]);
+
+                setStats({
+                    myServices: myServices.length,
+                    myBookings: bookings.length,
+                    totalServices: allServices.length,
+                });
             } catch (error) {
-                console.error('Failed to fetch user:', error);
+                console.error('Failed to fetch data:', error);
                 localStorage.removeItem('token');
                 navigate('/auth');
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchUser();
+        fetchData();
     }, [navigate]);
 
     const handleLogout = () => {
@@ -33,38 +58,184 @@ const Dashboard = () => {
         navigate('/auth');
     };
 
-    if (!user) return <div className="min-h-screen flex items-center justify-center bg-gray-100">Loading...</div>;
+    if (loading || !user) {
+        return (
+            <div
+                className="min-h-screen flex items-center justify-center"
+                style={{ background: 'var(--color-bg-primary)' }}
+            >
+                <LoadingSpinner size="lg" />
+            </div>
+        );
+    }
+
+    const statCards = [
+        {
+            title: 'My Services',
+            value: stats.myServices,
+            icon: Package,
+            color: 'var(--color-accent-purple)',
+            bgColor: 'rgba(168, 85, 247, 0.1)',
+        },
+        {
+            title: 'My Bookings',
+            value: stats.myBookings,
+            icon: Calendar,
+            color: 'var(--color-accent-blue)',
+            bgColor: 'rgba(59, 130, 246, 0.1)',
+        },
+        {
+            title: 'Available Services',
+            value: stats.totalServices,
+            icon: TrendingUp,
+            color: 'var(--color-success)',
+            bgColor: 'var(--color-success-bg)',
+        },
+    ];
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <nav className="bg-white shadow-sm p-4 flex justify-between items-center">
-                <h1 className="text-xl font-bold text-indigo-600">Neighbourly</h1>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-gray-600">
-                        <User size={20} />
-                        <span>{user.name}</span>
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                        <LogOut size={20} />
-                        Logout
-                    </button>
-                </div>
-            </nav>
+        <div style={{ background: 'var(--color-bg-primary)', minHeight: '100vh' }}>
+            <Sidebar user={user} onLogout={handleLogout} />
 
-            <main className="p-8">
-                <div className="max-w-7xl mx-auto">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-6">Dashboard</h2>
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center py-20">
-                        <h3 className="text-xl text-gray-500">Welcome to your dashboard!</h3>
-                        <p className="text-gray-400 mt-2">More features coming soon...</p>
+            <main className="ml-64 p-8">
+                <div className="container">
+                    {/* Header */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8"
+                    >
+                        <h1
+                            className="text-4xl font-bold mb-2"
+                            style={{ color: 'var(--color-text-primary)' }}
+                        >
+                            Welcome back, {user.name}! 👋
+                        </h1>
+                        <p style={{ color: 'var(--color-text-secondary)' }}>
+                            Here's what's happening in your community today
+                        </p>
+                    </motion.div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        {statCards.map((stat, index) => {
+                            const Icon = stat.icon;
+                            return (
+                                <motion.div
+                                    key={stat.title}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                >
+                                    <Card>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p
+                                                    className="text-sm font-medium mb-1"
+                                                    style={{ color: 'var(--color-text-secondary)' }}
+                                                >
+                                                    {stat.title}
+                                                </p>
+                                                <p
+                                                    className="text-3xl font-bold"
+                                                    style={{ color: 'var(--color-text-primary)' }}
+                                                >
+                                                    {stat.value}
+                                                </p>
+                                            </div>
+                                            <div
+                                                className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                                                style={{
+                                                    background: stat.bgColor,
+                                                }}
+                                            >
+                                                <Icon size={28} style={{ color: stat.color }} />
+                                            </div>
+                                        </div>
+                                    </Card>
+                                </motion.div>
+                            );
+                        })}
                     </div>
+
+                    {/* Quick Actions */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        <h2
+                            className="text-2xl font-bold mb-4"
+                            style={{ color: 'var(--color-text-primary)' }}
+                        >
+                            Quick Actions
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Card hover>
+                                <button
+                                    onClick={() => navigate('/services')}
+                                    className="w-full text-left"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div
+                                            className="w-12 h-12 rounded-xl flex items-center justify-center"
+                                            style={{ background: 'var(--gradient-primary)' }}
+                                        >
+                                            <Package size={24} color="white" />
+                                        </div>
+                                        <div>
+                                            <h3
+                                                className="font-semibold mb-1"
+                                                style={{ color: 'var(--color-text-primary)' }}
+                                            >
+                                                Browse Services
+                                            </h3>
+                                            <p
+                                                className="text-sm"
+                                                style={{ color: 'var(--color-text-secondary)' }}
+                                            >
+                                                Discover services in your community
+                                            </p>
+                                        </div>
+                                    </div>
+                                </button>
+                            </Card>
+
+                            <Card hover>
+                                <button
+                                    onClick={() => navigate('/my-services')}
+                                    className="w-full text-left"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div
+                                            className="w-12 h-12 rounded-xl flex items-center justify-center"
+                                            style={{ background: 'var(--gradient-accent)' }}
+                                        >
+                                            <Users size={24} color="white" />
+                                        </div>
+                                        <div>
+                                            <h3
+                                                className="font-semibold mb-1"
+                                                style={{ color: 'var(--color-text-primary)' }}
+                                            >
+                                                Manage My Services
+                                            </h3>
+                                            <p
+                                                className="text-sm"
+                                                style={{ color: 'var(--color-text-secondary)' }}
+                                            >
+                                                Add or edit your service listings
+                                            </p>
+                                        </div>
+                                    </div>
+                                </button>
+                            </Card>
+                        </div>
+                    </motion.div>
                 </div>
             </main>
         </div>
     );
 };
 
-export default Dashboard;
+export default DashboardPage;
