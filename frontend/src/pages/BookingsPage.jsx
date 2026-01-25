@@ -2,16 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getCurrentUser } from '../services/auth';
-import { bookingsAPI } from '../services/api';
+import { bookingsAPI, paymentsAPI } from '../services/api';
 import Sidebar from '../components/Sidebar';
 import { Card, Button, LoadingSpinner, EmptyState, Badge } from '../components/UIComponents';
-import { Calendar, Clock, User as UserIcon, Package, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Clock, User as UserIcon, Package, CheckCircle, XCircle, CreditCard, MessageSquare, Star } from 'lucide-react';
+import ChatDrawer from '../components/ChatDrawer';
+import ReviewModal from '../components/ReviewModal';
 
 const BookingsPage = () => {
     const [user, setUser] = useState(null);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all'); // all, as_seeker, as_provider
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isReviewOpen, setIsReviewOpen] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -50,6 +55,16 @@ const BookingsPage = () => {
     const handleUpdateStatus = async (bookingId, newStatus) => {
         try {
             await bookingsAPI.updateStatus(bookingId, newStatus);
+            fetchData();
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
+    const handlePayProvider = async (bookingId) => {
+        try {
+            await paymentsAPI.processPayment(bookingId);
+            alert('Payment processed successfully!');
             fetchData();
         } catch (error) {
             alert(error.message);
@@ -211,18 +226,40 @@ const BookingsPage = () => {
                                                 </div>
 
                                                 {/* Actions */}
-                                                {booking.status === 'pending' && (
-                                                    <div className="flex flex-col gap-2">
-                                                        {isProvider ? (
-                                                            <>
-                                                                <Button
-                                                                    variant="primary"
-                                                                    size="sm"
-                                                                    icon={CheckCircle}
-                                                                    onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
-                                                                >
-                                                                    Confirm
-                                                                </Button>
+                                                <div className="flex flex-col gap-2 min-w-[120px]">
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        icon={MessageSquare}
+                                                        onClick={() => {
+                                                            setSelectedBooking(booking);
+                                                            setIsChatOpen(true);
+                                                        }}
+                                                    >
+                                                        Chat
+                                                    </Button>
+                                                    {booking.status === 'pending' && (
+                                                        <div className="flex flex-col gap-2">
+                                                            {isProvider ? (
+                                                                <>
+                                                                    <Button
+                                                                        variant="primary"
+                                                                        size="sm"
+                                                                        icon={CheckCircle}
+                                                                        onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
+                                                                    >
+                                                                        Confirm
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="danger"
+                                                                        size="sm"
+                                                                        icon={XCircle}
+                                                                        onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
+                                                                    >
+                                                                        Cancel
+                                                                    </Button>
+                                                                </>
+                                                            ) : (
                                                                 <Button
                                                                     variant="danger"
                                                                     size="sm"
@@ -231,8 +268,20 @@ const BookingsPage = () => {
                                                                 >
                                                                     Cancel
                                                                 </Button>
-                                                            </>
-                                                        ) : (
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    {booking.status === 'confirmed' && isProvider && (
+                                                        <div className="flex flex-col gap-2">
+                                                            <Button
+                                                                variant="primary"
+                                                                size="sm"
+                                                                icon={CheckCircle}
+                                                                onClick={() => handleUpdateStatus(booking.id, 'completed')}
+                                                            >
+                                                                Mark Complete
+                                                            </Button>
                                                             <Button
                                                                 variant="danger"
                                                                 size="sm"
@@ -241,31 +290,36 @@ const BookingsPage = () => {
                                                             >
                                                                 Cancel
                                                             </Button>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                        </div>
+                                                    )}
 
-                                                {booking.status === 'confirmed' && isProvider && (
-                                                    <div className="flex flex-col gap-2">
-                                                        <Button
-                                                            variant="primary"
-                                                            size="sm"
-                                                            icon={CheckCircle}
-                                                            onClick={() => handleUpdateStatus(booking.id, 'completed')}
-                                                        >
-                                                            Mark Complete
-                                                        </Button>
-                                                        <Button
-                                                            variant="danger"
-                                                            size="sm"
-                                                            icon={XCircle}
-                                                            onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
-                                                        >
-                                                            Cancel
-                                                        </Button>
-                                                    </div>
-                                                )}
-                                            </div>
+                                                    {booking.status === 'completed' && !isProvider && (
+                                                        <div className="flex flex-col gap-2">
+                                                            {!booking.review && (
+                                                                <Button
+                                                                    variant="primary"
+                                                                    size="sm"
+                                                                    icon={Star}
+                                                                    onClick={() => {
+                                                                        setSelectedBooking(booking);
+                                                                        setIsReviewOpen(true);
+                                                                    }}
+                                                                >
+                                                                    Leave a Review
+                                                                </Button>
+                                                            )}
+                                                            <Button
+                                                                variant="secondary"
+                                                                size="sm"
+                                                                icon={CreditCard}
+                                                                onClick={() => handlePayProvider(booking.id)}
+                                                            >
+                                                                Pay Provider
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div> {/* End Actions Div */}
+                                            </div> {/* End Main Content Div */}
                                         </Card>
                                     </motion.div>
                                 );
@@ -274,6 +328,27 @@ const BookingsPage = () => {
                     )}
                 </div>
             </main>
+
+            <ChatDrawer
+                isOpen={isChatOpen}
+                onClose={() => {
+                    setIsChatOpen(false);
+                    setSelectedBooking(null);
+                }}
+                booking={selectedBooking}
+                currentUser={user}
+            />
+            <ReviewModal
+                isOpen={isReviewOpen}
+                onClose={() => {
+                    setIsReviewOpen(false);
+                    setSelectedBooking(null);
+                }}
+                booking={selectedBooking}
+                onSuccess={() => {
+                    fetchData();
+                }}
+            />
         </div>
     );
 };

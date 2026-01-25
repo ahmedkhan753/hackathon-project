@@ -110,10 +110,30 @@ class SearchEngine:
             
         except Exception as e:
             logger.error(f"Gemini Ranking Error: {e}")
-            # FALLBACK: If AI fails, assign 1.0 score so search still works (just not ranked)
+            # SMART FALLBACK: If AI fails, use text-based similarity
             for service in services:
-                service['score'] = 1.0
-            return services
+                service['score'] = self._calculate_fallback_score(
+                    query, 
+                    service.get('title', ''), 
+                    service.get('description', '')
+                )
+            # Re-sort by fallback score
+            return sorted(services, key=lambda x: x['score'], reverse=True)
+            
+    def _calculate_fallback_score(self, query: str, title: str, description: str) -> float:
+        """
+        Simple text-based similarity score for fallback when AI is disabled
+        """
+        query_words = set(query.lower().split())
+        content = (title + " " + (description or "")).lower()
+        
+        if not query_words:
+            return 0.0
+            
+        # Count how many query words are present in title/description
+        matches = sum(1 for word in query_words if word in content)
+        # Normalize by query length (0.0 to 1.0)
+        return matches / len(query_words)
     
     def get_model_info(self) -> Dict[str, Any]:
         """Get information about the model"""

@@ -1,5 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.models.service import Service
 from app.schemas.service import ServiceCreate, ServiceUpdate
@@ -8,6 +11,7 @@ from app.core.search_engine import search_engine
 
 
 def create(db: Session, provider_id: int, data: ServiceCreate) -> Service:
+    logger.info(f"Creating service for provider {provider_id} with data: {data.dict()}")
     # Generate H3 index if location provided
     h3_index = None
     if data.latitude is not None and data.longitude is not None:
@@ -24,6 +28,7 @@ def create(db: Session, provider_id: int, data: ServiceCreate) -> Service:
         category=data.category.strip() if data.category else None,
         latitude=data.latitude,
         longitude=data.longitude,
+        price=data.price,
         h3_index=h3_index,
         embedding=embedding,
         status="active",

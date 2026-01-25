@@ -4,6 +4,7 @@ import Dashboard from '../pages/Dashboard';
 import ServicesPage from '../pages/ServicesPage';
 import MyServicesPage from '../pages/MyServicesPage';
 import BookingsPage from '../pages/BookingsPage';
+import PaymentsPage from '../pages/PaymentsPage';
 import '../styles/App.css';
 
 // Error Boundary Component
@@ -90,6 +91,7 @@ function App() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/my-services" element={<MyServicesPage />} />
           <Route path="/bookings" element={<BookingsPage />} />
+          <Route path="/payments" element={<PaymentsPage />} />
           <Route path="/" element={<Navigate to="/auth" replace />} />
         </Routes>
       </Router>

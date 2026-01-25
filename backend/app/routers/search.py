@@ -95,8 +95,12 @@ async def search_services(
         service_dicts.append(service_dict)
     
     # 5️⃣ Rank by semantic similarity
+    is_ai_enabled = search_engine._enabled
     ranked_services = search_engine.rank_by_similarity(q, service_dicts)
-    logger.info(f"Ranked {len(ranked_services)} services by relevance")
+    logger.info(f"Ranked {len(ranked_services)} services by relevance (AI Enabled: {is_ai_enabled})")
+    
+    if not is_ai_enabled:
+        logger.warning("Search AI is disabled, using basic keyword matching")
     
     # 6️⃣ Take top results
     top_results = ranked_services[:limit]

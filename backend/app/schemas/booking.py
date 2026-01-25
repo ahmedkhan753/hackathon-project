@@ -26,6 +26,8 @@ class BookingResponse(BaseModel):
     slot_end: datetime
     status: str
     created_at: datetime
+    service: dict  # Include service details
+    seeker: dict   # Include seeker details
 
     class Config:
         from_attributes = True

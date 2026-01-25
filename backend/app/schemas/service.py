@@ -6,6 +6,7 @@ class ServiceCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     description: str | None = None
     category: str | None = Field(None, max_length=100)
+    price: float = Field(..., gt=0, description="Price per hour in USD")
     latitude: float | None = Field(None, ge=-90, le=90)
     longitude: float | None = Field(None, ge=-180, le=180)
 
@@ -23,6 +24,7 @@ class ServiceResponse(BaseModel):
     title: str
     description: str | None
     category: str | None
+    price: float
     status: str
     latitude: float | None = None
     longitude: float | None = None

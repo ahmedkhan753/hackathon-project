@@ -18,3 +18,6 @@ class Booking(Base):
 
     service = relationship("Service", back_populates="bookings")
     seeker = relationship("User", backref="bookings_made")
+    messages = relationship("ChatMessage", back_populates="booking")
+    review = relationship("Review", back_populates="booking", uselist=False)
+    payment = relationship("Payment", back_populates="booking", uselist=False)

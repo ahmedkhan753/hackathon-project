@@ -1,80 +1,43 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
 
-from app.db.database import engine, Base
-from app.routers import users, services, bookings, search as search_router
-from app.core.search_engine import search_engine
-from app.core.cache import cache_manager
+from app.db.database import engine
+from app.models import user, service, booking, review, audit_log, chat_message, payment
+from app.routers import users, search, bookings, services, chat, payments, reviews
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Create database tables
+user.Base.metadata.create_all(bind=engine)
+service.Base.metadata.create_all(bind=engine)
+booking.Base.metadata.create_all(bind=engine)
+review.Base.metadata.create_all(bind=engine)
+audit_log.Base.metadata.create_all(bind=engine)
+chat_message.Base.metadata.create_all(bind=engine)
+payment.Base.metadata.create_all(bind=engine)
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+app = FastAPI(title="Neighbourly API", version="1.0.0")
 
-app = FastAPI(
-    title="Neighbourly API",
-    description="Hyper-local marketplace with semantic search",
-    version="2.0.0"
-)
-
-# CORS
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # In production, specify your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Routers
+# Include routers
 app.include_router(users.router)
-app.include_router(services.router)
+app.include_router(search.router)
 app.include_router(bookings.router)
-app.include_router(search_router.router)
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize search engine on startup"""
-    logger.info("🚀 Starting Neighbourly API...")
-    logger.info("📊 Initializing search engine...")
-    
-    # This loads the ML model info (Cloud API)
-    _ = search_engine.get_model_info()
-    logger.info("✅ Search engine ready")
-    
-    # Test cache connection
-    cache_stats = cache_manager.get_stats()
-    logger.info(f"💾 Cache status: {cache_stats.get('status', 'unknown')}")
-
+app.include_router(services.router)
+app.include_router(chat.router)
+app.include_router(payments.router)
+app.include_router(reviews.router)
 
 @app.get("/")
 def read_root():
-    return {
-        "message": "Neighbourly API",
-        "version": "2.0.0",
-        "features": [
-            "Semantic Search (ML-powered)",
-            "Geospatial Intelligence (H3)",
-            "Redis Caching",
-            "User Authentication",
-            "Service Marketplace",
-            "Booking Management"
-        ]
-    }
+    return {"message": "Welcome to Neighbourly API"}
 
-
-@app.get("/health")
-def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "search_engine": search_engine.get_model_info(),
-        "cache": cache_manager.get_stats()
-    }
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

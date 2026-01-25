@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon, Home, Package, Calendar, User, LogOut, Plus } from 'lucide-react';
+import { Sun, Moon, Home, Package, Calendar, User, LogOut, Plus, CreditCard } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = ({ user, onLogout }) => {
@@ -14,6 +14,7 @@ const Sidebar = ({ user, onLogout }) => {
         { icon: Package, label: 'Browse Services', path: '/services' },
         { icon: Plus, label: 'My Services', path: '/my-services' },
         { icon: Calendar, label: 'My Bookings', path: '/bookings' },
+        { icon: CreditCard, label: 'Payments', path: '/payments' },
     ];
 
     const isActive = (path) => location.pathname === path;

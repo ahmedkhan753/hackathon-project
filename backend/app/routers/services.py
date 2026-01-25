@@ -16,6 +16,8 @@ def create_service(
     current_user: User = Depends(get_current_user),
 ):
     """Provider posts a new service listing."""
+    import logging
+    logging.getLogger(__name__).info(f"POST /services payload: {data.dict()}")
     svc = service_service.create(db, current_user.id, data)
     return svc
 

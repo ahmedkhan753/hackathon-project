@@ -13,6 +13,7 @@ class Service(Base):
     title = Column(String(200), nullable=False, index=True)
     description = Column(Text, nullable=True)
     category = Column(String(100), nullable=True, index=True)
+    price = Column(Float, nullable=False)  # Price per hour in USD
     status = Column(String(20), default="active", nullable=False)
     
     # Location fields for geospatial search

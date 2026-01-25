@@ -220,3 +220,137 @@ export const bookingsAPI = {
     return response.json();
   },
 };
+
+// ========================================
+// PAYMENTS API
+// ========================================
+
+export const paymentsAPI = {
+  // Process payment for a booking
+  processPayment: async (bookingId) => {
+    const response = await fetch(`${API_BASE_URL}/payments/process`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ booking_id: bookingId }),
+    });
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+
+  // Get payment for a specific booking
+  getForBooking: async (bookingId) => {
+    const response = await fetch(`${API_BASE_URL}/payments/booking/${bookingId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+
+  // Get payment history
+  getHistory: async () => {
+    const response = await fetch(`${API_BASE_URL}/payments/history`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+};
+
+// ========================================
+// CHAT API
+// ========================================
+
+export const chatAPI = {
+  // Get chat messages for a booking
+  getMessages: async (bookingId) => {
+    const response = await fetch(`${API_BASE_URL}/chat/messages/${bookingId}`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+
+  // Get total unread count
+  getUnreadCount: async () => {
+    const response = await fetch(`${API_BASE_URL}/chat/unread`, {
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+
+  // Mark all messages in a booking as read
+  markRead: async (bookingId) => {
+    const response = await fetch(`${API_BASE_URL}/chat/mark-read/${bookingId}`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+
+  // Helper to get WebSocket URL
+  getWebSocketUrl: (bookingId) => {
+    const token = localStorage.getItem('token');
+    const wsBaseUrl = API_BASE_URL.replace(/^http/, 'ws');
+    return `${wsBaseUrl}/chat/ws/${bookingId}?token=${token}`;
+  },
+};
+
+// ========================================
+// REVIEWS API
+// ========================================
+
+export const reviewsAPI = {
+  // Create a new review
+  create: async (reviewData) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(reviewData),
+    });
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+
+  // Get top rated providers
+  getTop: async (limit = 5) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/top?limit=${limit}`);
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+
+  // Get provider reputation stats
+  getStats: async (providerId) => {
+    const response = await fetch(`${API_BASE_URL}/reviews/stats/${providerId}`);
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+};

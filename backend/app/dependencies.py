@@ -62,3 +62,15 @@ def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+async def get_current_user_ws(token: str, db: Session):
+    """WebSocket specific user authentication from token"""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            return None
+        user = db.query(User).filter(User.username == username).first()
+        return user
+    except Exception:
+        return None

@@ -17,6 +17,7 @@ const MyServicesPage = () => {
         title: '',
         description: '',
         category: 'teaching',
+        price: '',
         latitude: null,
         longitude: null,
     });
@@ -53,14 +54,23 @@ const MyServicesPage = () => {
 
     const handleSubmit = async () => {
         try {
+            if (!formData.price || parseFloat(formData.price) <= 0) {
+                alert('Please enter a valid price greater than 0');
+                return;
+            }
+
             if (editingService) {
                 await servicesAPI.update(editingService.id, formData);
             } else {
-                await servicesAPI.create(formData);
+                const payload = {
+                    ...formData,
+                    price: parseFloat(formData.price)
+                };
+                await servicesAPI.create(payload);
             }
             setShowModal(false);
             setEditingService(null);
-            setFormData({ title: '', description: '', category: 'teaching' });
+            setFormData({ title: '', description: '', category: 'teaching', price: '' });
             fetchData();
         } catch (error) {
             alert(error.message);
@@ -73,6 +83,7 @@ const MyServicesPage = () => {
             title: service.title,
             description: service.description,
             category: service.category,
+            price: service.price,
         });
         setShowModal(true);
     };
@@ -132,7 +143,7 @@ const MyServicesPage = () => {
                             icon={Plus}
                             onClick={() => {
                                 setEditingService(null);
-                                setFormData({ title: '', description: '', category: 'teaching' });
+                                setFormData({ title: '', description: '', category: 'teaching', price: '' });
                                 setShowModal(true);
                             }}
                         >
@@ -227,7 +238,7 @@ const MyServicesPage = () => {
                         onClose={() => {
                             setShowModal(false);
                             setEditingService(null);
-                            setFormData({ title: '', description: '', category: 'teaching' });
+                            setFormData({ title: '', description: '', category: 'teaching', price: '' });
                         }}
                         title={editingService ? 'Edit Service' : 'Add New Service'}
                     >
@@ -268,6 +279,15 @@ const MyServicesPage = () => {
                                     ))}
                                 </select>
                             </div>
+
+                            <Input
+                                label="Price (per hour in USD)"
+                                type="number"
+                                step="0.01"
+                                placeholder="e.g., 25.00"
+                                value={formData.price}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                            />
 
                             {/* Location Fields */}
                             <div className="space-y-2">
@@ -323,7 +343,7 @@ const MyServicesPage = () => {
                                     onClick={() => {
                                         setShowModal(false);
                                         setEditingService(null);
-                                        setFormData({ title: '', description: '', category: 'teaching' });
+                                        setFormData({ title: '', description: '', category: 'teaching', price: '' });
                                     }}
                                 >
                                     Cancel
@@ -332,7 +352,7 @@ const MyServicesPage = () => {
                                     variant="primary"
                                     className="flex-1"
                                     onClick={handleSubmit}
-                                    disabled={!formData.title || !formData.description}
+                                    disabled={!formData.title || !formData.description || !formData.price}
                                 >
                                     {editingService ? 'Update' : 'Create'}
                                 </Button>

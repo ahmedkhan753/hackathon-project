@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getCurrentUser } from '../services/auth';
-import { servicesAPI, bookingsAPI } from '../services/api';
 import Sidebar from '../components/Sidebar';
 import { Card, LoadingSpinner } from '../components/UIComponents';
-import { Package, Calendar, TrendingUp, Users } from 'lucide-react';
+import { Package, Calendar, TrendingUp, Users, MessageSquare, Star } from 'lucide-react';
+import { servicesAPI, bookingsAPI, chatAPI, reviewsAPI } from '../services/api';
 
 const DashboardPage = () => {
     const [user, setUser] = useState(null);
@@ -30,16 +30,20 @@ const DashboardPage = () => {
                 setUser(userData);
 
                 // Fetch stats
-                const [myServices, bookings, allServices] = await Promise.all([
+                const [myServices, bookings, allServices, unreadData, topProvidersData] = await Promise.all([
                     servicesAPI.list({ provider_id: userData.id }),
                     bookingsAPI.list(),
                     servicesAPI.list({ limit: 1 }),
+                    chatAPI.getUnreadCount(),
+                    reviewsAPI.getTop(3)
                 ]);
 
                 setStats({
                     myServices: myServices.length,
                     myBookings: bookings.length,
                     totalServices: allServices.length,
+                    unreadCount: unreadData.unread_count,
+                    topProviders: topProvidersData || []
                 });
             } catch (error) {
                 console.error('Failed to fetch data:', error);
@@ -158,6 +162,50 @@ const DashboardPage = () => {
                         })}
                     </div>
 
+                    {/* Top Rated Neighbors */}
+                    {stats.topProviders && stats.topProviders.length > 0 && (
+                        <div className="mb-8">
+                            <h2
+                                className="text-2xl font-bold mb-4"
+                                style={{ color: 'var(--color-text-primary)' }}
+                            >
+                                Top Rated Neighbors 🏆
+                            </h2>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {stats.topProviders.map((item, index) => (
+                                    <motion.div
+                                        key={item.provider_id}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: 0.2 + index * 0.1 }}
+                                    >
+                                        <Card className="!p-5">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] font-bold">
+                                                    {item.provider_name.charAt(0)}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-bold text-[var(--color-text-primary)] truncate">
+                                                        {item.provider_name}
+                                                    </h3>
+                                                    <div className="flex items-center gap-1 text-[var(--color-warning)]">
+                                                        <Star size={14} fill="currentColor" />
+                                                        <span className="text-sm font-bold">
+                                                            {item.score_data.overall_score}
+                                                        </span>
+                                                        <span className="text-xs text-[var(--color-text-tertiary)] ml-1">
+                                                            ({item.score_data.total_reviews} reviews)
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Quick Actions */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -225,6 +273,36 @@ const DashboardPage = () => {
                                                 style={{ color: 'var(--color-text-secondary)' }}
                                             >
                                                 Add or edit your service listings
+                                            </p>
+                                        </div>
+                                    </div>
+                                </button>
+                            </Card>
+
+                            <Card hover>
+                                <button
+                                    onClick={() => navigate('/bookings')}
+                                    className="w-full text-left"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div
+                                            className="w-12 h-12 rounded-xl flex items-center justify-center"
+                                            style={{ background: 'var(--color-primary)' }}
+                                        >
+                                            <MessageSquare size={24} color="white" />
+                                        </div>
+                                        <div>
+                                            <h3
+                                                className="font-semibold mb-1"
+                                                style={{ color: 'var(--color-text-primary)' }}
+                                            >
+                                                Messages
+                                            </h3>
+                                            <p
+                                                className="text-sm"
+                                                style={{ color: 'var(--color-text-secondary)' }}
+                                            >
+                                                You have {stats.unreadCount || 0} unread messages
                                             </p>
                                         </div>
                                     </div>
