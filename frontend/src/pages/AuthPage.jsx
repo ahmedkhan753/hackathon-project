@@ -164,11 +164,10 @@ const AuthPage = () => {
                 <motion.div variants={itemVariants} className="flex mb-8 bg-slate-700/50 p-1 rounded-xl backdrop-blur-sm">
                     <motion.button
                         onClick={toggleMode}
-                        className={`flex-1 py-3 px-4 rounded-lg transition-all duration-300 font-medium ${
-                            isLogin
+                        className={`flex-1 py-3 px-4 rounded-lg transition-all duration-300 font-medium ${isLogin
                                 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                                 : 'text-slate-400 hover:text-slate-300'
-                        }`}
+                            }`}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >
@@ -176,11 +175,10 @@ const AuthPage = () => {
                     </motion.button>
                     <motion.button
                         onClick={toggleMode}
-                        className={`flex-1 py-3 px-4 rounded-lg transition-all duration-300 font-medium ${
-                            !isLogin
+                        className={`flex-1 py-3 px-4 rounded-lg transition-all duration-300 font-medium ${!isLogin
                                 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
                                 : 'text-slate-400 hover:text-slate-300'
-                        }`}
+                            }`}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                     >
@@ -195,11 +193,10 @@ const AuthPage = () => {
                             initial={{ opacity: 0, y: -20, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                            className={`p-4 rounded-xl mb-6 flex items-center gap-3 ${
-                                success
+                            className={`p-4 rounded-xl mb-6 flex items-center gap-3 ${success
                                     ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
                                     : 'bg-red-500/20 border border-red-500/30 text-red-400'
-                            }`}
+                                }`}
                         >
                             {success ? (
                                 <CheckCircle size={20} />
@@ -213,70 +210,57 @@ const AuthPage = () => {
 
                 <motion.form
                     onSubmit={handleSubmit}
-                    className="space-y-5"
+                    className="space-y-4"
                     variants={containerVariants}
                 >
                     <AnimatePresence mode="wait">
                         {!isLogin && (
                             <motion.div
                                 key="register-fields"
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="space-y-5"
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-4"
                             >
                                 <motion.div variants={itemVariants}>
+                                    <label className="block text-slate-400 text-xs font-medium mb-1.5 ml-1">Full Name</label>
                                     <div className="relative">
-                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+                                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500" size={18} />
                                         <input
                                             type="text"
                                             name="name"
-                                            placeholder="Full Name"
+                                            placeholder="Enter your full name"
                                             value={formData.name}
                                             onChange={handleChange}
-                                            className={`w-full bg-slate-700/50 border text-white pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-sm ${
-                                                formErrors.name
-                                                    ? 'border-red-500 focus:ring-red-500'
-                                                    : 'border-slate-600 focus:ring-indigo-500'
-                                            }`}
+                                            className={`w-full bg-slate-700/30 border text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-sm ${formErrors.name
+                                                    ? 'border-red-500/50 focus:ring-red-500/30'
+                                                    : 'border-slate-600/50 focus:ring-indigo-500/30'
+                                                }`}
                                         />
                                     </div>
                                     {formErrors.name && (
-                                        <motion.p
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            className="text-red-400 text-sm mt-1"
-                                        >
-                                            {formErrors.name}
-                                        </motion.p>
+                                        <p className="text-red-400 text-[10px] mt-1 ml-1">{formErrors.name}</p>
                                     )}
                                 </motion.div>
 
                                 <motion.div variants={itemVariants}>
+                                    <label className="block text-slate-400 text-xs font-medium mb-1.5 ml-1">Email Address</label>
                                     <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+                                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500" size={18} />
                                         <input
                                             type="email"
                                             name="email"
-                                            placeholder="Email Address"
+                                            placeholder="you@example.com"
                                             value={formData.email}
                                             onChange={handleChange}
-                                            className={`w-full bg-slate-700/50 border text-white pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-sm ${
-                                                formErrors.email
-                                                    ? 'border-red-500 focus:ring-red-500'
-                                                    : 'border-slate-600 focus:ring-indigo-500'
-                                            }`}
+                                            className={`w-full bg-slate-700/30 border text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-sm ${formErrors.email
+                                                    ? 'border-red-500/50 focus:ring-red-500/30'
+                                                    : 'border-slate-600/50 focus:ring-indigo-500/30'
+                                                }`}
                                         />
                                     </div>
                                     {formErrors.email && (
-                                        <motion.p
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            className="text-red-400 text-sm mt-1"
-                                        >
-                                            {formErrors.email}
-                                        </motion.p>
+                                        <p className="text-red-400 text-[10px] mt-1 ml-1">{formErrors.email}</p>
                                     )}
                                 </motion.div>
                             </motion.div>
@@ -284,63 +268,51 @@ const AuthPage = () => {
                     </AnimatePresence>
 
                     <motion.div variants={itemVariants}>
+                        <label className="block text-slate-400 text-xs font-medium mb-1.5 ml-1">Username</label>
                         <div className="relative">
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500" size={18} />
                             <input
                                 type="text"
                                 name="username"
-                                placeholder="Username"
+                                placeholder="Choose a unique username"
                                 value={formData.username}
                                 onChange={handleChange}
-                                className={`w-full bg-slate-700/50 border text-white pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-sm ${
-                                    formErrors.username
-                                        ? 'border-red-500 focus:ring-red-500'
-                                        : 'border-slate-600 focus:ring-indigo-500'
-                                }`}
+                                className={`w-full bg-slate-700/30 border text-white pl-10 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-sm ${formErrors.username
+                                        ? 'border-red-500/50 focus:ring-red-500/30'
+                                        : 'border-slate-600/50 focus:ring-indigo-500/30'
+                                    }`}
                             />
                         </div>
                         {formErrors.username && (
-                            <motion.p
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="text-red-400 text-sm mt-1"
-                            >
-                                {formErrors.username}
-                            </motion.p>
+                            <p className="text-red-400 text-[10px] mt-1 ml-1">{formErrors.username}</p>
                         )}
                     </motion.div>
 
                     <motion.div variants={itemVariants}>
+                        <label className="block text-slate-400 text-xs font-medium mb-1.5 ml-1">Password</label>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500" size={18} />
                             <input
                                 type={showPassword ? "text" : "password"}
                                 name="password"
-                                placeholder="Password"
+                                placeholder="••••••••"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className={`w-full bg-slate-700/50 border text-white pl-12 pr-12 py-4 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-sm ${
-                                    formErrors.password
-                                        ? 'border-red-500 focus:ring-red-500'
-                                        : 'border-slate-600 focus:ring-indigo-500'
-                                }`}
+                                className={`w-full bg-slate-700/30 border text-white pl-10 pr-10 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 backdrop-blur-sm ${formErrors.password
+                                        ? 'border-red-500/50 focus:ring-red-500/30'
+                                        : 'border-slate-600/50 focus:ring-indigo-500/30'
+                                    }`}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
                             >
-                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                             </button>
                         </div>
                         {formErrors.password && (
-                            <motion.p
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="text-red-400 text-sm mt-1"
-                            >
-                                {formErrors.password}
-                            </motion.p>
+                            <p className="text-red-400 text-[10px] mt-1 ml-1">{formErrors.password}</p>
                         )}
                     </motion.div>
 

@@ -72,6 +72,9 @@ export const servicesAPI = {
     if (params.provider_id) queryParams.append('provider_id', params.provider_id);
     if (params.skip !== undefined) queryParams.append('skip', params.skip);
     if (params.limit !== undefined) queryParams.append('limit', params.limit);
+    if (params.lat !== undefined) queryParams.append('lat', params.lat);
+    if (params.lng !== undefined) queryParams.append('lng', params.lng);
+    if (params.radius_km !== undefined) queryParams.append('radius_km', params.radius_km);
 
     const url = `${API_BASE_URL}/services${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
     const response = await fetch(url);
@@ -117,6 +120,41 @@ export const servicesAPI = {
       throw new Error(msg);
     }
     return true;
+  },
+};
+
+// ========================================
+// SEARCH API (Semantic + Location-Aware)
+// ========================================
+
+export const searchAPI = {
+  // Semantic search with location filtering
+  search: async ({ query, lat, lng, km = 5, limit = 10 }) => {
+    const queryParams = new URLSearchParams({
+      q: query,
+      lat: lat.toString(),
+      lng: lng.toString(),
+      km: km.toString(),
+      limit: limit.toString(),
+    });
+
+    const url = `${API_BASE_URL}/search?${queryParams.toString()}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
+
+  // Get search engine stats
+  getStats: async () => {
+    const response = await fetch(`${API_BASE_URL}/search/stats`);
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
   },
 };
 

@@ -17,6 +17,8 @@ const MyServicesPage = () => {
         title: '',
         description: '',
         category: 'teaching',
+        latitude: null,
+        longitude: null,
     });
     const navigate = useNavigate();
 
@@ -265,6 +267,53 @@ const MyServicesPage = () => {
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+
+                            {/* Location Fields */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                                    Location (Optional - for search)
+                                </label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Input
+                                        label="Latitude"
+                                        type="number"
+                                        step="0.000001"
+                                        placeholder="40.7128"
+                                        value={formData.latitude || ''}
+                                        onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) || null })}
+                                    />
+                                    <Input
+                                        label="Longitude"
+                                        type="number"
+                                        step="0.000001"
+                                        placeholder="-74.0060"
+                                        value={formData.longitude || ''}
+                                        onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) || null })}
+                                    />
+                                </div>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => {
+                                        if (navigator.geolocation) {
+                                            navigator.geolocation.getCurrentPosition(
+                                                (position) => {
+                                                    setFormData({
+                                                        ...formData,
+                                                        latitude: position.coords.latitude,
+                                                        longitude: position.coords.longitude
+                                                    });
+                                                },
+                                                (error) => alert('Could not get location: ' + error.message)
+                                            );
+                                        } else {
+                                            alert('Geolocation not supported');
+                                        }
+                                    }}
+                                >
+                                    📍 Use My Location
+                                </Button>
                             </div>
 
                             <div className="flex gap-3">

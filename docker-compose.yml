@@ -16,6 +16,19 @@ services:
       timeout: 20s
       retries: 10
 
+  # Redis for search caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   adminer:
     image: adminer
     ports:
@@ -28,7 +41,7 @@ services:
     command: server /data
     ports:
       - "9000:9000"
-      - "9001:9001" # Added Console port for your browser access
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -45,10 +58,14 @@ services:
     env_file: .env
     environment:
       - DATABASE_URL=mysql+pymysql://user:pass@db:3306/neighbourly
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     ports:
       - "8000:8000"
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   frontend:
@@ -64,3 +81,4 @@ services:
 volumes:
   minio_data:
   db_data:
+  redis_data:

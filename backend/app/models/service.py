@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -14,8 +14,18 @@ class Service(Base):
     description = Column(Text, nullable=True)
     category = Column(String(100), nullable=True, index=True)
     status = Column(String(20), default="active", nullable=False)
+    
+    # Location fields for geospatial search
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+    h3_index = Column(String(20), nullable=True, index=True)
+    
+    # Semantic search field
+    embedding = Column(JSON, nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     provider = relationship("User", backref="services_provided")
     bookings = relationship("Booking", back_populates="service", cascade="all, delete-orphan")
+
