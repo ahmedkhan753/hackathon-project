@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
+from app.schemas.user import UserResponse
 
 
 class ServiceCreate(BaseModel):
@@ -51,6 +52,24 @@ class ServiceList(BaseModel):
     
     # Search score (only populated in search results)
     score: float | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class ServiceDetailedResponse(BaseModel):
+    id: int
+    provider_id: int
+    title: str
+    description: str | None
+    category: str | None
+    price: float
+    status: str
+    latitude: float | None = None
+    longitude: float | None = None
+    created_at: datetime
+    updated_at: datetime | None
+    provider: UserResponse | None = None
 
     class Config:
         from_attributes = True

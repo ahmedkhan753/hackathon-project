@@ -3,10 +3,20 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_db, get_current_user
 from app.models.user import User
-from app.schemas.service import ServiceCreate, ServiceUpdate, ServiceResponse, ServiceList
+from app.schemas.service import ServiceCreate, ServiceUpdate, ServiceResponse, ServiceList, ServiceDetailedResponse
 from app.services import service_service
 
 router = APIRouter(prefix="/services", tags=["services"])
+
+
+@router.get("/all", response_model=list[ServiceDetailedResponse])
+def get_all_services(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=200),
+    db: Session = Depends(get_db),
+):
+    """List all services with full information (provider details, etc)."""
+    return service_service.get_all_services(db, skip=skip, limit=limit)
 
 
 @router.post("", response_model=ServiceResponse, status_code=201)

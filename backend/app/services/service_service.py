@@ -105,3 +105,8 @@ def delete(db: Session, service_id: int, user_id: int) -> bool:
     db.delete(svc)
     db.commit()
     return True
+
+
+def get_all_services(db: Session, skip: int = 0, limit: int = 100) -> list[Service]:
+    """Fetches all services with no filters, used for admin or full list views."""
+    return db.query(Service).order_by(Service.created_at.desc()).offset(skip).limit(limit).all()
