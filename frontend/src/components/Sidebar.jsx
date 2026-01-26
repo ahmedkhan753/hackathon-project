@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon, Home, Package, Calendar, User, LogOut, Plus, CreditCard } from 'lucide-react';
+import { Sun, Moon, Home, Package, Calendar, User, LogOut, Plus, CreditCard, Sparkles } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = ({ user, onLogout }) => {
