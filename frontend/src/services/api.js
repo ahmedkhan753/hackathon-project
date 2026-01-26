@@ -121,6 +121,21 @@ export const servicesAPI = {
     }
     return true;
   },
+
+  // Get all services with detailed information (provider info etc)
+  getAllDetailed: async (params = {}) => {
+    const queryParams = new URLSearchParams();
+    if (params.skip !== undefined) queryParams.append('skip', params.skip);
+    if (params.limit !== undefined) queryParams.append('limit', params.limit);
+
+    const url = `${API_BASE_URL}/services/all${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      const msg = await getErrorDetail(response);
+      throw new Error(msg);
+    }
+    return response.json();
+  },
 };
 
 // ========================================
