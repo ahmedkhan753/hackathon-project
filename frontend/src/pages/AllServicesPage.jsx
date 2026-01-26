@@ -10,14 +10,18 @@ import { Calendar, User as UserIcon, Package, Sparkles, Tag, DollarSign, Clock }
 const AllServicesPage = () => {
     const [user, setUser] = useState(null);
     const [services, setServices] = useState([]);
+    const [filteredServices, setFilteredServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [bookingModal, setBookingModal] = useState(false);
     const [selectedService, setSelectedService] = useState(null);
+    const [activeCategory, setActiveCategory] = useState('All');
     const [bookingData, setBookingData] = useState({
         slot_start: '',
         slot_end: '',
     });
     const navigate = useNavigate();
+
+    const categories = ['All', ...new Set(services.map(s => s.category || 'General'))];
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -29,6 +33,14 @@ const AllServicesPage = () => {
         initializePage();
     }, [navigate]);
 
+    useEffect(() => {
+        if (activeCategory === 'All') {
+            setFilteredServices(services);
+        } else {
+            setFilteredServices(services.filter(s => (s.category || 'General') === activeCategory));
+        }
+    }, [activeCategory, services]);
+
     const initializePage = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -38,6 +50,7 @@ const AllServicesPage = () => {
             ]);
             setUser(userData);
             setServices(servicesData);
+            setFilteredServices(servicesData);
         } catch (error) {
             console.error('Failed to initialize page:', error);
             if (error.message.includes('auth') || error.message.includes('token')) {
@@ -101,16 +114,33 @@ const AllServicesPage = () => {
                         </p>
                     </motion.div>
 
+                    {/* Category Filter */}
+                    <div className="mb-8 flex flex-wrap gap-2">
+                        {categories.map(cat => (
+                            <Button
+                                key={cat}
+                                variant={activeCategory === cat ? 'primary' : 'secondary'}
+                                size="sm"
+                                onClick={() => setActiveCategory(cat)}
+                                className="capitalize"
+                            >
+                                {cat}
+                            </Button>
+                        ))}
+                    </div>
+
                     {/* Results Grid */}
-                    {services.length === 0 ? (
+                    {filteredServices.length === 0 ? (
                         <EmptyState
                             icon={Package}
                             title="No services found"
-                            description="It looks like there are no services available right now."
+                            description={activeCategory === 'All'
+                                ? "It looks like there are no services available right now."
+                                : `No services found in the "${activeCategory}" category.`}
                         />
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {services.map((service, index) => (
+                            {filteredServices.map((service, index) => (
                                 <motion.div
                                     key={service.id}
                                     initial={{ opacity: 0, y: 20 }}
