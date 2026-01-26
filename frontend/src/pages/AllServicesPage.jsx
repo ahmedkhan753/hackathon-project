@@ -110,7 +110,7 @@ const AllServicesPage = () => {
                             <Sparkles size={32} className="text-[var(--color-accent-purple)]" />
                         </div>
                         <p className="text-[var(--color-text-secondary)]">
-                            Explore all available services in your community
+                            Explore all {services.length} available services in your community
                         </p>
                     </motion.div>
 
