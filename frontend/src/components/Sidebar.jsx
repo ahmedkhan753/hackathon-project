@@ -15,6 +15,7 @@ const Sidebar = ({ user, onLogout }) => {
         { icon: Plus, label: 'My Services', path: '/my-services' },
         { icon: Calendar, label: 'My Bookings', path: '/bookings' },
         { icon: CreditCard, label: 'Payments', path: '/payments' },
+        { icon: Sparkles, label: 'All Services', path: '/all-services' },
     ];
 
     const isActive = (path) => location.pathname === path;
