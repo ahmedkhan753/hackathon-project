@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getCurrentUser } from '../services/auth';
 import { servicesAPI, bookingsAPI } from '../services/api';
 import Sidebar from '../components/Sidebar';
-import { Card, Button, Modal, LoadingSpinner, EmptyState, Badge } from '../components/UIComponents';
+import { Card, Button, Modal, LoadingSpinner, EmptyState, Badge, Input } from '../components/UIComponents';
 import { Calendar, User as UserIcon, Package, Sparkles, Tag, DollarSign, Clock } from 'lucide-react';
 
 const AllServicesPage = () => {
