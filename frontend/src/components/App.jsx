@@ -82,18 +82,25 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+import Layout from './Layout';
+
 function App() {
   return (
     <ErrorBoundary>
       <Router>
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/services" element={<ServicesPage />} />
-          <Route path="/my-services" element={<MyServicesPage />} />
-          <Route path="/bookings" element={<BookingsPage />} />
-          <Route path="/payments" element={<PaymentsPage />} />
-          <Route path="/all-services" element={<AllServicesPage />} />
+
+          {/* Authenticated Routes */}
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/my-services" element={<MyServicesPage />} />
+            <Route path="/bookings" element={<BookingsPage />} />
+            <Route path="/payments" element={<PaymentsPage />} />
+            <Route path="/all-services" element={<AllServicesPage />} />
+          </Route>
+
           <Route path="/" element={<Navigate to="/auth" replace />} />
         </Routes>
       </Router>

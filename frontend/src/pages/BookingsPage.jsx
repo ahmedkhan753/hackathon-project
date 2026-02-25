@@ -1,16 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getCurrentUser } from '../services/auth';
 import { bookingsAPI, paymentsAPI } from '../services/api';
-import Sidebar from '../components/Sidebar';
 import { Card, Button, LoadingSpinner, EmptyState, Badge } from '../components/UIComponents';
 import { Calendar, Clock, User as UserIcon, Package, CheckCircle, XCircle, CreditCard, MessageSquare, Star } from 'lucide-react';
 import ChatDrawer from '../components/ChatDrawer';
 import ReviewModal from '../components/ReviewModal';
 
 const BookingsPage = () => {
-    const [user, setUser] = useState(null);
+    const { user, handleLogout } = useOutletContext();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all'); // all, as_seeker, as_provider
@@ -20,21 +17,13 @@ const BookingsPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            navigate('/auth');
-            return;
+        if (user) {
+            fetchData();
         }
-
-        fetchData();
-    }, [navigate, filter]);
+    }, [user, filter]);
 
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const userData = await getCurrentUser(token);
-            setUser(userData);
-
             const params = filter === 'all'
                 ? { as_seeker: true, as_provider: true }
                 : filter === 'as_seeker'
@@ -45,8 +34,6 @@ const BookingsPage = () => {
             setBookings(bookingsData);
         } catch (error) {
             console.error('Failed to fetch data:', error);
-            localStorage.removeItem('token');
-            navigate('/auth');
         } finally {
             setLoading(false);
         }
@@ -71,11 +58,6 @@ const BookingsPage = () => {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        navigate('/auth');
-    };
-
     const getStatusBadge = (status) => {
         const variants = {
             pending: 'warning',
@@ -98,257 +80,120 @@ const BookingsPage = () => {
 
     if (loading || !user) {
         return (
-            <div
-                className="min-h-screen flex items-center justify-center"
-                style={{ background: 'var(--color-bg-primary)' }}
-            >
+            <div className="flex items-center justify-center p-12">
                 <LoadingSpinner size="lg" />
             </div>
         );
     }
 
     return (
-        <div style={{ background: 'var(--color-bg-primary)', minHeight: '100vh' }}>
-            <Sidebar user={user} onLogout={handleLogout} />
+        <div className="container">
+            {/* Header */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8"
+            >
+                <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                    My Bookings
+                </h1>
+                <p style={{ color: 'var(--color-text-secondary)' }}>
+                    Manage your service bookings
+                </p>
+            </motion.div>
 
-            <main className="ml-64 p-8">
-                <div className="container">
-                    {/* Header */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-8"
-                    >
-                        <h1
-                            className="text-4xl font-bold mb-2"
-                            style={{ color: 'var(--color-text-primary)' }}
-                        >
-                            My Bookings
-                        </h1>
-                        <p style={{ color: 'var(--color-text-secondary)' }}>
-                            Manage your service bookings
-                        </p>
-                    </motion.div>
+            {/* Filter Tabs */}
+            <div className="mb-6 flex gap-2">
+                <Button variant={filter === 'all' ? 'primary' : 'secondary'} size="sm" onClick={() => setFilter('all')}>
+                    All Bookings
+                </Button>
+                <Button variant={filter === 'as_seeker' ? 'primary' : 'secondary'} size="sm" onClick={() => setFilter('as_seeker')}>
+                    My Requests
+                </Button>
+                <Button variant={filter === 'as_provider' ? 'primary' : 'secondary'} size="sm" onClick={() => setFilter('as_provider')}>
+                    Service Requests
+                </Button>
+            </div>
 
-                    {/* Filter Tabs */}
-                    <div className="mb-6 flex gap-2">
-                        <Button
-                            variant={filter === 'all' ? 'primary' : 'secondary'}
-                            size="sm"
-                            onClick={() => setFilter('all')}
-                        >
-                            All Bookings
-                        </Button>
-                        <Button
-                            variant={filter === 'as_seeker' ? 'primary' : 'secondary'}
-                            size="sm"
-                            onClick={() => setFilter('as_seeker')}
-                        >
-                            My Requests
-                        </Button>
-                        <Button
-                            variant={filter === 'as_provider' ? 'primary' : 'secondary'}
-                            size="sm"
-                            onClick={() => setFilter('as_provider')}
-                        >
-                            Service Requests
-                        </Button>
-                    </div>
-
-                    {/* Bookings List */}
-                    {bookings.length === 0 ? (
-                        <EmptyState
-                            icon={Calendar}
-                            title="No bookings found"
-                            description="You don't have any bookings yet"
-                        />
-                    ) : (
-                        <div className="space-y-4">
-                            {bookings.map((booking, index) => {
-                                const isProvider = booking.service.provider_id === user.id;
-
-                                return (
-                                    <motion.div
-                                        key={booking.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.05 }}
-                                    >
-                                        <Card>
-                                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                                <div className="flex-1 space-y-3">
-                                                    <div className="flex items-start justify-between">
-                                                        <div>
-                                                            <h3
-                                                                className="text-lg font-bold mb-1"
-                                                                style={{ color: 'var(--color-text-primary)' }}
-                                                            >
-                                                                {booking.service.title}
-                                                            </h3>
-                                                            <div className="flex items-center gap-2">
-                                                                {getStatusBadge(booking.status)}
-                                                                <Badge variant="info">
-                                                                    {isProvider ? 'As Provider' : 'As Seeker'}
-                                                                </Badge>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                        <div
-                                                            className="flex items-center gap-2 text-sm"
-                                                            style={{ color: 'var(--color-text-secondary)' }}
-                                                        >
-                                                            <Clock size={16} />
-                                                            <span>Start: {formatDate(booking.slot_start)}</span>
-                                                        </div>
-                                                        <div
-                                                            className="flex items-center gap-2 text-sm"
-                                                            style={{ color: 'var(--color-text-secondary)' }}
-                                                        >
-                                                            <Clock size={16} />
-                                                            <span>End: {formatDate(booking.slot_end)}</span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div
-                                                        className="flex items-center gap-2 text-sm"
-                                                        style={{ color: 'var(--color-text-tertiary)' }}
-                                                    >
-                                                        <UserIcon size={16} />
-                                                        <span>
-                                                            {isProvider
-                                                                ? `Booked by: ${booking.seeker?.name || 'Unknown'}`
-                                                                : `Provider: ${booking.service.provider?.name || 'Unknown'}`
-                                                            }
-                                                        </span>
+            {/* Bookings List */}
+            {bookings.length === 0 ? (
+                <EmptyState icon={Calendar} title="No bookings found" description="You don't have any bookings yet" />
+            ) : (
+                <div className="space-y-4">
+                    {bookings.map((booking, index) => {
+                        const isProvider = booking.service.provider_id === user.id;
+                        return (
+                            <motion.div key={booking.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
+                                <Card>
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div className="flex-1 space-y-3">
+                                            <div className="flex items-start justify-between">
+                                                <div>
+                                                    <h3 className="text-lg font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                                                        {booking.service.title}
+                                                    </h3>
+                                                    <div className="flex items-center gap-2">
+                                                        {getStatusBadge(booking.status)}
+                                                        <Badge variant="info">{isProvider ? 'As Provider' : 'As Seeker'}</Badge>
                                                     </div>
                                                 </div>
-
-                                                {/* Actions */}
-                                                <div className="flex flex-col gap-2 min-w-[120px]">
-                                                    <Button
-                                                        variant="secondary"
-                                                        size="sm"
-                                                        icon={MessageSquare}
-                                                        onClick={() => {
-                                                            setSelectedBooking(booking);
-                                                            setIsChatOpen(true);
-                                                        }}
-                                                    >
-                                                        Chat
-                                                    </Button>
-                                                    {booking.status === 'pending' && (
-                                                        <div className="flex flex-col gap-2">
-                                                            {isProvider ? (
-                                                                <>
-                                                                    <Button
-                                                                        variant="primary"
-                                                                        size="sm"
-                                                                        icon={CheckCircle}
-                                                                        onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
-                                                                    >
-                                                                        Confirm
-                                                                    </Button>
-                                                                    <Button
-                                                                        variant="danger"
-                                                                        size="sm"
-                                                                        icon={XCircle}
-                                                                        onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
-                                                                    >
-                                                                        Cancel
-                                                                    </Button>
-                                                                </>
-                                                            ) : (
-                                                                <Button
-                                                                    variant="danger"
-                                                                    size="sm"
-                                                                    icon={XCircle}
-                                                                    onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
-                                                                >
-                                                                    Cancel
-                                                                </Button>
-                                                            )}
-                                                        </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                                                    <Clock size={16} />
+                                                    <span>Start: {formatDate(booking.slot_start)}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                                                    <Clock size={16} />
+                                                    <span>End: {formatDate(booking.slot_end)}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
+                                                <UserIcon size={16} />
+                                                <span>{isProvider ? `Booked by: ${booking.seeker?.name || 'Unknown'}` : `Provider: ${booking.service.provider?.name || 'Unknown'}`}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col gap-2 min-w-[120px]">
+                                            <Button variant="secondary" size="sm" icon={MessageSquare} onClick={() => { setSelectedBooking(booking); setIsChatOpen(true); }}>
+                                                Chat
+                                            </Button>
+                                            {booking.status === 'pending' && (
+                                                <div className="flex flex-col gap-2">
+                                                    {isProvider ? (
+                                                        <>
+                                                            <Button variant="primary" size="sm" icon={CheckCircle} onClick={() => handleUpdateStatus(booking.id, 'confirmed')}>Confirm</Button>
+                                                            <Button variant="danger" size="sm" icon={XCircle} onClick={() => handleUpdateStatus(booking.id, 'cancelled')}>Cancel</Button>
+                                                        </>
+                                                    ) : (
+                                                        <Button variant="danger" size="sm" icon={XCircle} onClick={() => handleUpdateStatus(booking.id, 'cancelled')}>Cancel</Button>
                                                     )}
-
-                                                    {booking.status === 'confirmed' && isProvider && (
-                                                        <div className="flex flex-col gap-2">
-                                                            <Button
-                                                                variant="primary"
-                                                                size="sm"
-                                                                icon={CheckCircle}
-                                                                onClick={() => handleUpdateStatus(booking.id, 'completed')}
-                                                            >
-                                                                Mark Complete
-                                                            </Button>
-                                                            <Button
-                                                                variant="danger"
-                                                                size="sm"
-                                                                icon={XCircle}
-                                                                onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
-                                                            >
-                                                                Cancel
-                                                            </Button>
-                                                        </div>
+                                                </div>
+                                            )}
+                                            {booking.status === 'confirmed' && isProvider && (
+                                                <div className="flex flex-col gap-2">
+                                                    <Button variant="primary" size="sm" icon={CheckCircle} onClick={() => handleUpdateStatus(booking.id, 'completed')}>Mark Complete</Button>
+                                                    <Button variant="danger" size="sm" icon={XCircle} onClick={() => handleUpdateStatus(booking.id, 'cancelled')}>Cancel</Button>
+                                                </div>
+                                            )}
+                                            {booking.status === 'completed' && !isProvider && (
+                                                <div className="flex flex-col gap-2">
+                                                    {!booking.review && (
+                                                        <Button variant="primary" size="sm" icon={Star} onClick={() => { setSelectedBooking(booking); setIsReviewOpen(true); }}>Leave a Review</Button>
                                                     )}
-
-                                                    {booking.status === 'completed' && !isProvider && (
-                                                        <div className="flex flex-col gap-2">
-                                                            {!booking.review && (
-                                                                <Button
-                                                                    variant="primary"
-                                                                    size="sm"
-                                                                    icon={Star}
-                                                                    onClick={() => {
-                                                                        setSelectedBooking(booking);
-                                                                        setIsReviewOpen(true);
-                                                                    }}
-                                                                >
-                                                                    Leave a Review
-                                                                </Button>
-                                                            )}
-                                                            <Button
-                                                                variant="secondary"
-                                                                size="sm"
-                                                                icon={CreditCard}
-                                                                onClick={() => handlePayProvider(booking.id)}
-                                                            >
-                                                                Pay Provider
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </div> {/* End Actions Div */}
-                                            </div> {/* End Main Content Div */}
-                                        </Card>
-                                    </motion.div>
-                                );
-                            })}
-                        </div>
-                    )}
+                                                    <Button variant="secondary" size="sm" icon={CreditCard} onClick={() => handlePayProvider(booking.id)}>Pay Provider</Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </Card>
+                            </motion.div>
+                        );
+                    })}
                 </div>
-            </main>
+            )}
 
-            <ChatDrawer
-                isOpen={isChatOpen}
-                onClose={() => {
-                    setIsChatOpen(false);
-                    setSelectedBooking(null);
-                }}
-                booking={selectedBooking}
-                currentUser={user}
-            />
-            <ReviewModal
-                isOpen={isReviewOpen}
-                onClose={() => {
-                    setIsReviewOpen(false);
-                    setSelectedBooking(null);
-                }}
-                booking={selectedBooking}
-                onSuccess={() => {
-                    fetchData();
-                }}
-            />
+            <ChatDrawer isOpen={isChatOpen} onClose={() => { setIsChatOpen(false); setSelectedBooking(null); }} booking={selectedBooking} currentUser={user} />
+            <ReviewModal isOpen={isReviewOpen} onClose={() => { setIsReviewOpen(false); setSelectedBooking(null); }} booking={selectedBooking} onSuccess={fetchData} />
         </div>
     );
 };
