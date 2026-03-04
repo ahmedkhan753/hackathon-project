@@ -1,7 +1,7 @@
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { searchAPI, bookingsAPI } from '../services/api';
-import { Card, Button, Input, Modal, LoadingSpinner, EmptyState, Badge } from '../components/UIComponents';
+import { Card, Button, Input, Modal, LoadingSpinner, EmptyState, Badge, Skeleton } from '../components/UIComponents';
 import { Search, MapPin, Calendar, User as UserIcon, Package, Sparkles } from 'lucide-react';
 
 const ServicesPage = () => {
@@ -86,10 +86,20 @@ const ServicesPage = () => {
 
     if (loading || !user) {
         return (
-            <div
-                className="flex items-center justify-center p-12"
-            >
-                <LoadingSpinner size="lg" />
+            <div className="container">
+                <div className="mb-8">
+                    <Skeleton height={40} width="40%" className="mb-2" />
+                    <Skeleton height={20} width="60%" />
+                </div>
+                <Card className="mb-6">
+                    <div className="space-y-4">
+                        <div className="flex gap-3">
+                            <Skeleton height={44} className="flex-1" />
+                            <Skeleton height={44} width={100} />
+                        </div>
+                        <Skeleton height={20} width="30%" />
+                    </div>
+                </Card>
             </div>
         );
     }
@@ -182,7 +192,31 @@ const ServicesPage = () => {
             </Card>
 
             {/* Results */}
-            {services.length === 0 ? (
+            {searching ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <Card key={i}>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-start">
+                                    <Skeleton height={24} width="70%" />
+                                    <Skeleton height={20} width="20%" variant="rect" />
+                                </div>
+                                <Skeleton height={12} width="100%" />
+                                <div className="space-y-2">
+                                    <Skeleton height={12} width="100%" />
+                                    <Skeleton height={12} width="90%" />
+                                    <Skeleton height={12} width="80%" />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Skeleton variant="circle" height={24} width={24} />
+                                    <Skeleton height={16} width="40%" />
+                                </div>
+                                <Skeleton height={40} width="100%" />
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+            ) : services.length === 0 ? (
                 <EmptyState
                     icon={Package}
                     title="No results yet"

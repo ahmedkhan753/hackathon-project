@@ -1,7 +1,7 @@
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { paymentsAPI } from '../services/api';
-import { Card, Button, LoadingSpinner, EmptyState, Badge } from '../components/UIComponents';
+import { Card, Button, LoadingSpinner, EmptyState, Badge, Skeleton } from '../components/UIComponents';
 import { CreditCard, DollarSign } from 'lucide-react';
 
 const PaymentsPage = () => {
@@ -39,8 +39,32 @@ const PaymentsPage = () => {
 
     if (loading || !user) {
         return (
-            <div className="flex items-center justify-center p-12">
-                <LoadingSpinner size="lg" />
+            <div className="container">
+                <div className="mb-8">
+                    <Skeleton height={40} width="300px" className="mb-2" />
+                    <Skeleton height={20} width="200px" />
+                </div>
+                <div className="space-y-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                        <Card key={i}>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex-1 space-y-3">
+                                    <div>
+                                        <Skeleton height={24} width="40%" className="mb-2" />
+                                        <div className="flex gap-2">
+                                            <Skeleton height={20} width={80} />
+                                            <Skeleton height={20} width={150} />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <Skeleton height={16} width="100px" />
+                                        <Skeleton height={16} width="150px" />
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
             </div>
         );
     }

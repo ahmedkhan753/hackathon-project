@@ -21,6 +21,7 @@ export const Button = ({
         primary: {
             background: 'var(--gradient-primary)',
             color: 'white',
+            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.25)',
         },
         secondary: {
             background: 'var(--color-surface)',
@@ -34,6 +35,7 @@ export const Button = ({
         danger: {
             background: 'var(--color-error)',
             color: 'white',
+            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)',
         },
     };
 
@@ -47,8 +49,17 @@ export const Button = ({
                 opacity: disabled ? 0.5 : 1,
                 cursor: disabled ? 'not-allowed' : 'pointer',
             }}
-            whileHover={!disabled ? { scale: 1.02 } : {}}
+            whileHover={!disabled ? {
+                scale: 1.02,
+                y: -1,
+                boxShadow: variant === 'primary'
+                    ? '0 6px 20px rgba(99, 102, 241, 0.35)'
+                    : variant === 'danger'
+                        ? '0 6px 20px rgba(239, 68, 68, 0.35)'
+                        : 'var(--shadow-lg)'
+            } : {}}
             whileTap={!disabled ? { scale: 0.98 } : {}}
+            transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             {...props}
         >
             {Icon && <Icon size={size === 'sm' ? 16 : size === 'lg' ? 20 : 18} />}
@@ -110,45 +121,79 @@ export const Input = ({
 };
 
 export const Badge = ({ children, variant = 'info', className = '' }) => {
+    const customVariants = {
+        purple: {
+            background: 'rgba(168, 85, 247, 0.1)',
+            color: 'var(--color-accent-purple)',
+        },
+        blue: {
+            background: 'rgba(59, 130, 246, 0.1)',
+            color: 'var(--color-accent-blue)',
+        },
+        pink: {
+            background: 'rgba(236, 72, 153, 0.1)',
+            color: 'var(--color-accent-pink)',
+        }
+    };
+
+    const style = customVariants[variant] || {};
+    const baseClass = customVariants[variant] ? '' : `badge-${variant}`;
+
     return (
-        <span className={`badge badge-${variant} ${className}`}>
+        <span className={`badge ${baseClass} ${className}`} style={style}>
             {children}
         </span>
     );
 };
 
 export const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-2xl' }) => {
-    if (!isOpen) return null;
-
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: 'rgba(0, 0, 0, 0.7)' }}
-            onClick={onClose}
-        >
-            <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className={`w-full ${maxWidth} rounded-2xl p-6`}
-                style={{
-                    background: 'var(--color-bg-elevated)',
-                    border: '1px solid var(--color-surface-border)',
-                    boxShadow: 'var(--shadow-xl)',
-                }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                {title && (
-                    <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-                        {title}
-                    </h2>
-                )}
-                {children}
-            </motion.div>
-        </motion.div>
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ background: 'var(--color-bg-overlay)' }}
+                    onClick={onClose}
+                >
+                    <motion.div
+                        initial={{ y: 20, opacity: 0, scale: 0.95 }}
+                        animate={{ y: 0, opacity: 1, scale: 1 }}
+                        exit={{ y: 20, opacity: 0, scale: 0.95 }}
+                        transition={{ type: 'spring', duration: 0.4 }}
+                        className={`w-full ${maxWidth} rounded-2xl overflow-hidden`}
+                        style={{
+                            background: 'var(--color-bg-elevated)',
+                            border: '1px solid var(--color-surface-border)',
+                            boxShadow: 'var(--shadow-xl)',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {title && (
+                            <div className="px-6 py-4 border-b border-[var(--color-surface-border)] flex items-center justify-between">
+                                <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                                    {title}
+                                </h2>
+                                <button
+                                    onClick={onClose}
+                                    className="p-2 rounded-full hover:bg-[var(--color-surface-hover)] transition-colors"
+                                    style={{ color: 'var(--color-text-secondary)' }}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
+                        <div className="p-6">
+                            {children}
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 
@@ -195,5 +240,25 @@ export const EmptyState = ({ icon: Icon, title, description, action }) => {
             </p>
             {action}
         </div>
+    );
+};
+
+export const Skeleton = ({ className = '', width, height, variant = 'rect' }) => {
+    const style = {
+        width: width,
+        height: height,
+    };
+
+    const variantClasses = {
+        rect: 'rounded-xl',
+        circle: 'rounded-full',
+        text: 'rounded-md h-4 mb-2 last:mb-0 w-full',
+    };
+
+    return (
+        <div
+            className={`skeleton ${variantClasses[variant]} ${className}`}
+            style={style}
+        />
     );
 };

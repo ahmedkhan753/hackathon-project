@@ -1,7 +1,7 @@
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { servicesAPI } from '../services/api';
-import { Card, Button, Input, Modal, LoadingSpinner, EmptyState, Badge } from '../components/UIComponents';
+import { Card, Button, Input, Modal, LoadingSpinner, EmptyState, Badge, Skeleton } from '../components/UIComponents';
 import { Plus, Edit2, Trash2, Package } from 'lucide-react';
 
 const MyServicesPage = () => {
@@ -88,8 +88,36 @@ const MyServicesPage = () => {
 
     if (loading || !user) {
         return (
-            <div className="flex items-center justify-center p-12">
-                <LoadingSpinner size="lg" />
+            <div className="container">
+                <div className="mb-8 flex items-center justify-between">
+                    <div>
+                        <Skeleton height={40} width={250} className="mb-2" />
+                        <Skeleton height={20} width={180} />
+                    </div>
+                    <Skeleton height={44} width={140} />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                        <Card key={i}>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-start">
+                                    <Skeleton height={24} width="60%" />
+                                    <Skeleton height={20} width={60} />
+                                </div>
+                                <Skeleton height={20} width={80} />
+                                <div className="space-y-2">
+                                    <Skeleton height={12} width="100%" />
+                                    <Skeleton height={12} width="100%" />
+                                    <Skeleton height={12} width="40%" />
+                                </div>
+                                <div className="flex gap-2">
+                                    <Skeleton height={36} className="flex-1" />
+                                    <Skeleton height={36} className="flex-1" />
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
             </div>
         );
     }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Card, LoadingSpinner } from '../components/UIComponents';
+import { Card, LoadingSpinner, Skeleton } from '../components/UIComponents';
 import { Package, Calendar, TrendingUp, Users, MessageSquare, Star } from 'lucide-react';
 import { servicesAPI, bookingsAPI, chatAPI, reviewsAPI } from '../services/api';
 
@@ -48,10 +48,56 @@ const DashboardPage = () => {
 
     if (loading) {
         return (
-            <div
-                className="flex items-center justify-center p-12"
-            >
-                <LoadingSpinner size="lg" />
+            <div className="container">
+                <div className="mb-8">
+                    <Skeleton height={40} width="60%" className="mb-2" />
+                    <Skeleton height={20} width="40%" />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {[1, 2, 3].map((i) => (
+                        <Card key={i}>
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-2 flex-1">
+                                    <Skeleton variant="text" width="60%" />
+                                    <Skeleton variant="text" width="40%" height={32} />
+                                </div>
+                                <Skeleton variant="circle" width={56} height={56} />
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+
+                <div className="mb-8">
+                    <Skeleton height={32} width="200px" className="mb-4" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[1, 2, 3].map((i) => (
+                            <Card key={i}>
+                                <div className="flex items-center gap-4">
+                                    <Skeleton variant="circle" width={48} height={48} />
+                                    <div className="flex-1 space-y-2">
+                                        <Skeleton variant="text" width="80%" />
+                                        <Skeleton variant="text" width="50%" />
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[1, 2, 3].map((i) => (
+                        <Card key={i}>
+                            <div className="flex items-center gap-4">
+                                <Skeleton height={48} width={48} />
+                                <div className="space-y-2 flex-1">
+                                    <Skeleton variant="text" width="40%" />
+                                    <Skeleton variant="text" width="70%" />
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
             </div>
         );
     }

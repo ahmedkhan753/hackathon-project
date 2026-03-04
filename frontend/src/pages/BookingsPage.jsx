@@ -1,7 +1,7 @@
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { bookingsAPI, paymentsAPI } from '../services/api';
-import { Card, Button, LoadingSpinner, EmptyState, Badge } from '../components/UIComponents';
+import { Card, Button, LoadingSpinner, EmptyState, Badge, Skeleton } from '../components/UIComponents';
 import { Calendar, Clock, User as UserIcon, Package, CheckCircle, XCircle, CreditCard, MessageSquare, Star } from 'lucide-react';
 import ChatDrawer from '../components/ChatDrawer';
 import ReviewModal from '../components/ReviewModal';
@@ -80,8 +80,42 @@ const BookingsPage = () => {
 
     if (loading || !user) {
         return (
-            <div className="flex items-center justify-center p-12">
-                <LoadingSpinner size="lg" />
+            <div className="container">
+                <div className="mb-8">
+                    <Skeleton height={40} width="30%" className="mb-2" />
+                    <Skeleton height={20} width="50%" />
+                </div>
+                <div className="mb-6 flex gap-2">
+                    <Skeleton height={36} width={100} />
+                    <Skeleton height={36} width={100} />
+                    <Skeleton height={36} width={100} />
+                </div>
+                <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                        <Card key={i}>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex-1 space-y-4">
+                                    <div className="space-y-2">
+                                        <Skeleton height={24} width="40%" />
+                                        <div className="flex gap-2">
+                                            <Skeleton height={20} width={80} />
+                                            <Skeleton height={20} width={80} />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <Skeleton height={16} width="60%" />
+                                        <Skeleton height={16} width="60%" />
+                                    </div>
+                                    <Skeleton height={16} width="30%" />
+                                </div>
+                                <div className="flex flex-col gap-2 min-w-[120px]">
+                                    <Skeleton height={32} />
+                                    <Skeleton height={32} />
+                                </div>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
             </div>
         );
     }
